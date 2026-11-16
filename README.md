@@ -4,23 +4,14 @@
 
 # md-parse-fast
 
-A dependency-free Markdown-to-HTML parser in a single ES module (`parse.js`)
-that returns byte-identical output to marked 18.1.3 `marked.parse` with
-default options (GFM on: tables, strikethrough, extended autolinks, task
-lists), while running faster than marked itself.
-
-How it works:
-
-- Full CommonMark 0.31.2 + GFM block and inline lexing that mirrors marked's
-  tokenizer semantics exactly — including its quirks (link reference
-  definition handling, emphasis delimiter-run rules with the rule of three,
-  masking passes for emphasis/strikethrough scanning, entity decoding, and
-  email autolink encoding).
-- Speed comes from first-character dispatch at the block and inline level,
-  cheap necessary-condition pre-scans that skip expensive rules (tables,
-  setext headings, HTML blocks, link definitions), guarded masking passes,
-  and a plain-text fast path for inline sources that provably lex as a single
-  text token. Parsing is stateless per call.
-
-`main.ts` is the competition driver: it reads `/input/cases.json`, renders
-each case with `parse()`, and writes `/output/html.json`.
+A dependency-free Markdown renderer whose `parse(markdown)` returns, for
+every input, exactly the HTML that marked 18.1.3 produces with default
+options — while running faster. `parse.js` is a single ES module built as
+a block phase (with link definitions collected and inline work queued so
+forward references resolve), an inline phase (with the reference's
+emphasis masking and delimiter-run rules), and a direct string renderer.
+Speed comes from first-character dispatch in both phases, cheap
+necessary-condition scans before the expensive grammar patterns, and a
+plain-text fast path for inline runs without triggers. `main.ts` is the
+harness driver: it reads `/input/cases.json` and writes
+`/output/html.json`.
